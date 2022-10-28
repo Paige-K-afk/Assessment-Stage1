@@ -60,6 +60,11 @@ sy:
     .byte 0
 err:
     .word 0
+delta_y:
+    .word
+delta_x:
+    .word
+#define two 2 
 
 abs_function:
 # value to absolute is in ax
@@ -105,16 +110,55 @@ cons_drawline:
     call abs_function # absolute and store dy to cx, which is in ax right now
     movw %ax, %cx
 
-    movw %dx, %bx
-    sub %cx, %bx
+    movw %dx, %bx # moves dx (dx) to %bx
+    sub %cx, %bx # subtract dy (cx) from %bx
     movw %bx, err # err := dx - dy 
+
+    movw %dx, %bx # Moves dx to bx to prevent conflicts later now that bx is no longer being used as a modifier register.
+    # This is because EVERYTHING wants to overwrite dx for some reason.
 
 
 
     draw:
-    # dx is stored in dx, dy is stored in cx.
+    # dx is stored in bx, dy is stored in cx.
+    movw %bx, (delta_x)
+    movw %cx, (delta_y)
+    # so they don't get messed up by drawPixel
+
     # setPixel(0x,0y,colour)
 
+    movw (delta_x), %bx
+    movw (delta_y), %cx
+   
+    movw (x1), %ax # move x1 to register so it can actualy be compared to x0
+    cmp (x0), %ax # becase cmp can't take two literal memory adresses, one has to be moved into a register first.
+    je end_draw  # . if x0 = x1, exit loop
+    movw (y1), %ax # move y1 to register so it can actualy be compared to y0
+    cmp (y0), %ax
+    je end_draw  # . y0 = y1 exit loop
+    
+    movw (err), %dx
+    movw two, %ax
+    mul %dx  # %dx stores e2 which is :  e2 := 2 * err. result is in ax.
+    movw %ax, %dx # move ax back to dx. don't mess with dx.
+
+    movw %cx, %ax
+    neg %ax
+    cmp %ax, %dx # . if e2 > -%cx then je would trigger. I want this to drop through so checks -cx ≥ e2 instead.
+    jg e2_notGreaterThan_negDy # dy is stored in the cx
+    SUB %cx, (err)
+    movw (x0), %si # move x0 into register
+    ADD (sx), %si # add sx to si register
+    movw %si, (x0) # move new result back into x0
+    e2_notGreaterThan_negDy: # end if
+    
+    cmp %dx, %bx # . if e2 < %bx (aka, %bx> e2), we want it to drop through. We check  e2>%bx instead 
+    je e2_notLessThan_Dx # dx is stored in the bx
+    ADD %bx, (err)
+    movw (y0), %si # move y0 into register
+    ADD (sy), %si # add sy to si register
+    movw %si, (y0) # move si back into y0
+    e2_notLessThan_Dx: # end if
 
     jmp draw
     end_draw:
