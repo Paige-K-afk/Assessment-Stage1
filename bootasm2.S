@@ -53,7 +53,7 @@ x1:
 y1:
     .word 0
 line_colour:
-    .word 0
+    .byte 0
 sx:
     .byte 0
 sy:
@@ -75,6 +75,15 @@ abs_minus_ax:
 neg %ax # negate %ax
 ret
 
+setPixel:
+    movb $0x0C, %ah     # AH 0x0C
+    movb (line_colour), %al # AL The colour for the pixel (see below)
+    movb $0, %bh # BH The video page number (should be set to 0)
+    movw (x0), %cx # CX Column number (starting from 0)
+    movw (y0), %dx # DX Row number (starting from 0)
+
+ret
+
 cons_drawline:
     # draw a line between any two points on the screen using a specified colour. Each point has an x and y coordinate.
     # each point is a parameter.
@@ -82,7 +91,7 @@ cons_drawline:
     movw %bx, (y0)
     movw %cx, (x1)
     movw %dx, (y1)
-    movw %si, (line_colour)
+    movb %si, (line_colour)
 
     movw (x1), %ax
     movw (x0), %bx
@@ -125,7 +134,7 @@ cons_drawline:
     movw %cx, (delta_y)
     # so they don't get messed up by drawPixel
 
-    # setPixel(0x,0y,colour)
+    call setPixel # setPixel(0x,0y,colour) # TODO
 
     movw (delta_x), %bx
     movw (delta_y), %cx
