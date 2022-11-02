@@ -111,9 +111,9 @@ cons_drawline:
     x0_lessthan:
     movb $1, (sx) # then sx := 1
     x0_done:
-    sub %ax, %bx # dx := (x1 - x0) 
-    call abs_function # absolute and store dx to dx, which is in ax right now
-    movw %ax, %dx
+    sub %bx, %ax # ax := (x1 - x0)  
+    call abs_function # absolute and store ax to dx, which is in ax right now
+    movw %ax, (delta_x) # store and save it in ax
 
     movw (y1), %ax
     movw (y0), %bx
@@ -124,23 +124,17 @@ cons_drawline:
     y0_lessthan:
     movb $1, (sy) # then sx := 1# then sy := 1
     y0_done:
-    sub %ax, %bx # dy := (y1 - y0)
+    sub %bx, %ax # dy := abs(y1 - y0) 
     call abs_function # absolute and store dy to cx, which is in ax right now
-    movw %ax, %cx
+    movw %ax, (delta_y) # store and save it to %delta x
 
-    movw %dx, %bx # moves dx (dx) to %bx
-    sub %bx, %cx # subtract dy (cx) from %bx
-    movw %bx, (err) # err := dx - dy 
+    movw (delta_x), %ax
+    movw (delta_y), %bx
+    sub %bx, %ax # err := dx - dy 
+    movw %ax, (err) 
 
-    movw %dx, %bx # Moves dx to bx to prevent conflicts later now that bx is no longer being used as a modifier register.
-    # This is because EVERYTHING wants to overwrite dx for some reason.
 
     draw:
-    # dx is stored in bx, dy is stored in cx.
-    movw %bx, (delta_x)
-    movw %cx, (delta_y)
-    # so they don't get messed up by drawPixel
-
     call setPixel # setPixel(0x,0y,colour) # TODO
    
     movw (x1), %ax # move x1 to register so it can actualy be compared to x0
@@ -167,7 +161,8 @@ cons_drawline:
     cmp %ax, %dx # . if e2 > -%cx then je would trigger. I want this to drop through so checks -cx ≥ e2 instead.
     jg e2_notGreaterThan_negDy # dy is stored in the cx
     movw (err), %ax # moves err to ax for CONSISTENCY
-    SUB %cx, %ax
+    SUB (delta_y), %ax  # err := err - dy
+    movw %ax, (err)
     movw (x0), %si # move x0 into register
     ADD (sx), %si # add sx to si register
     movw %si, (x0) # move new result back into x0
@@ -175,12 +170,19 @@ cons_drawline:
     
     cmp %dx, %bx # . if e2 < %bx (aka, %bx> e2), we want it to drop through. We check  e2>%bx instead 
     je e2_notLessThan_Dx # dx is stored in the bx
-    ADD %bx, (err)
+    movw (err), %ax
+    ADD (delta_x), %ax # err := err + dx
+    movw %ax, (err)
     movw (y0), %si # move y0 into register
-    ADD (sy), %si # add sy to si register
+    ADD (sy), %si # add sy to si register 
     movw %si, (y0) # move si back into y0
     e2_notLessThan_Dx: # end if
 
+    # dx is stored in bx, dy is stored in cx.
+    movw %bx, (delta_x)
+    movw %cx, (delta_y)
+    # so they don't get messed up by drawPixel which is the first thing after draw:
+    # this is here because else, it'll be messing up everything else.
     jmp draw
     end_draw:
     ret
