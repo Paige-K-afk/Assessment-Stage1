@@ -70,7 +70,7 @@ delta_x:
 abs_function:
 # value to absolute is in ax
 cmp $0, %ax
-jge abs_minus_ax
+je abs_minus_ax
 ret
 abs_minus_ax:
 neg %ax # negate %ax
@@ -120,6 +120,7 @@ cons_drawline:
     movw (x1), %ax
     movw (x0), %bx
     cmp %bx, %ax # destination 0x, source x1. 
+    # cmp %ax, %bx # reversed
     jl x0_lessthan # if x0 < x1, cary flag wil be 1. jc jumps if cary flag = 1.
     movb $-1, (sx) # . else sx := -1 
     jmp x0_done
@@ -130,6 +131,7 @@ cons_drawline:
     movw (y1), %ax
     movw (y0), %bx
     cmp %bx, %ax # destination bx (y0), source ax (y1)
+    # cmp %ax, %bx # reversed
     jl y0_lessthan # if y0 < y1 , cary flag will be 1. jc jumps if cf = 1.
     movb $-1, (sy) # . else sy := -1 
     jmp y0_done
@@ -152,12 +154,14 @@ cons_drawline:
     # is x equal
     movw (x1), %ax # move x1 to register so it can actualy be compared to x0
     cmp (x0), %ax # becase cmp can't take two literal memory adresses, one has to be moved into a register first.
+    # cmp %ax, (x0) # reversed
     # 0x is destination, x1 is source. if zero flag is not set, jump.
     # je end_draw # this is here to help see what is broken.
     jne xy_not_equal_cont  # . if x0 = x1, and y0 - y1, exit loop, so if it's not equal here (zf = 0), we can skip the y check.
     # is y equal
     movw (y1), %ax # move y1 to register so it can actualy be compared to y0
     cmp (y0), %ax
+    # cmp %ax, (y0) # reversed
     # y0 is destination. y1 is source. if equal, zf is 1. if zf is 1, jump.
     je end_draw  # . y0 = y1 exit loop
     xy_not_equal_cont:
@@ -173,8 +177,8 @@ cons_drawline:
 
     neg %cx
     
-    # ISSUE IN CMP AND JUMP
     cmp (e2), %cx # (e2) is destination, %cx is source. if e2> -dy
+    # cmp %cx, (e2) # reversed
     jg e2_greaterThan_negDy
     jmp e2_notGreaterThan_negDy
     e2_greaterThan_negDy:
@@ -189,8 +193,8 @@ cons_drawline:
     # restore bx and cx to delta x and y
     movw (delta_x), %bx
 
-    # ISSUE IN CMP AND JUMP
     cmp (e2), %bx # (e2) is destination, %bx is source. if e2<dx
+    # cmp %bx, (e2) #reversed
     jl e2_lessThan_Dx
     jmp e2_lessThan_Dx
     e2_lessThan_Dx:
