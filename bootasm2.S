@@ -126,7 +126,8 @@ abs_function:
     # value to absolute is in ax
     cmp $0, %ax
     jns abs_pos_ax
-    neg %ax # negate %ax
+    movw $-1, %dx
+    imul %dx # negate %ax (mul's do ax * target, store in ax)
     ret
     abs_pos_ax:
     ret
@@ -138,7 +139,7 @@ setPixel:
     movb $0, %bh # BH The video page number (should be set to 0)
     movw (x0), %cx # CX Column number (starting from 0)
     movw (y0), %dx # DX Row number (starting from 0)
-    # int $0x10
+    int $0x10
     
     ret
 
@@ -162,27 +163,31 @@ cons_drawline:
     movw (x1), %bx
     movw (x0), %ax
     sub %bx, %ax # ax := (x1 - x0) 
-    call abs_function # absolute and store ax to dx, which is in ax right now
+    # better equivalent of call abs_function # absolute and store ax to dx, which is in ax right now
+    cmp $0, %ax
+    jns xabs_pos_ax
+    movw $-1, %dx
+    imul %dx # negate %ax (mul's do ax * target, store in ax)
+    xabs_pos_ax:
     movw %ax, (delta_x) # store and save it in ax
-
-    push (delta_x)
-    pushw   $10
-    call    cons_write_number
-    call cons_write_crlf
-
 
     # dy := abs(y1 - y0)
     movw (y1), %bx
     movw (y0), %ax
     sub %bx, %ax # dy := abs(y1 - y0) 
-    call abs_function # absolute and store dy to cx, which is in ax right now
+    # better equivalent of call abs_function # absolute and store dy to cx, which is in ax right now
+    cmp $0, %ax
+    jns yabs_pos_ax
+    movw $-1, %dx
+    imul %dx # negate %ax (mul's do ax * target, store in ax)
+    yabs_pos_ax:
     movw %ax, (delta_y) # store and save it to %delta x
 
    
 
     # Checking if x0 y0 is right stub:
     pushw    (delta_x)
-     pushw   $10
+    pushw   $10
     call    cons_write_number
     call cons_write_crlf
     pushw    (delta_y)
@@ -223,15 +228,6 @@ cons_drawline:
     draw:
 
     call setPixel # setPixel(0x,0y,colour)
-
- #   pushw    (x0)
- #    pushw   $10
- #   call    cons_write_number
- #   call cons_write_crlf
-  #  pushw    (y0)
-  #   pushw   $10
-  #  call    cons_write_number
-  #  call cons_write_crlf
    
     # . if x0 = x1 and y0 = y1 exit loop
     # is x equal
@@ -294,7 +290,7 @@ real_start:
     movw    $boot_message, %si  # Display our boot message
     call    cons_writeline
 
-    # call switch_to_vga
+     call switch_to_vga
 
     movw $15, %si # x0
     movw $15, %ax # y0
