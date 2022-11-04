@@ -110,9 +110,9 @@ y1:
 line_colour:
     .byte 0
 sx:
-    .byte 0
+    .word 0
 sy:
-    .byte 0
+    .word 0
 err:
     .word 0
 e2:
@@ -183,17 +183,6 @@ cons_drawline:
     yabs_pos_ax:
     movw %ax, (delta_y) # store and save it to %delta x
 
-   
-
-    # Checking if x0 y0 is right stub:
-    pushw    (delta_x)
-    pushw   $10
-    call    cons_write_number
-    call cons_write_crlf
-    pushw    (delta_y)
-     pushw   $10
-    call    cons_write_number
-    call cons_write_crlf
 
     # . if x0 < x1 then sx := 1 else sx := -1
     movw (x1), %ax
@@ -201,10 +190,10 @@ cons_drawline:
     cmp %bx, %ax # destination 0x, source x1. 
     # cmp %ax, %bx # reversed
     jl x0_lessthan # if x0 < x1, cary flag wil be 1. jc jumps if cary flag = 1.
-    movb $-1, (sx) # . else sx := -1 
+    movw $-1, (sx) # . else sx := -1 
     jmp x0_done
     x0_lessthan:
-    movb $1, (sx) # then sx := 1
+    movw $1, (sx) # then sx := 1
     x0_done:
     # . if y0 < y1 then sy := 1 else sy := -1
     movw (y1), %ax
@@ -212,10 +201,10 @@ cons_drawline:
     cmp %bx, %ax # destination bx (y0), source ax (y1)
     # cmp %ax, %bx # reversed
     jl y0_lessthan # if y0 < y1 , cary flag will be 1. jc jumps if cf = 1.
-    movb $-1, (sy) # . else sy := -1 
+    movw $-1, (sy) # . else sy := -1 
     jmp y0_done
     y0_lessthan:
-    movb $1, (sy) # then sy := 1
+    movw $1, (sy) # then sy := 1
     y0_done:
 
     # err = dx - dy
@@ -225,7 +214,37 @@ cons_drawline:
     movw %bx, (err) 
 
 
+    # TESTING:
+     pushw    (x0)
+     pushw   $10
+     call    cons_write_number
+     call cons_write_crlf
+     pushw    (y0)
+     pushw   $10
+     call    cons_write_number
+     call cons_write_crlf
+    pushw    (sx)
+     pushw   $10
+     call    cons_write_number
+     call cons_write_crlf
+    pushw    (sy)
+     pushw   $10
+     call    cons_write_number
+     call cons_write_crlf
+
     draw:
+
+
+# Checking if x0 y0 is right stub:
+    # pushw    (x0)
+    # pushw   $10
+    # call    cons_write_number
+    # call cons_write_crlf
+    # pushw    (y0)
+    # pushw   $10
+    # call    cons_write_number
+    # call cons_write_crlf
+
 
     call setPixel # setPixel(0x,0y,colour)
    
@@ -254,10 +273,10 @@ cons_drawline:
     
     cmp (e2), %cx # (e2) is destination, %cx is source. if e2> -dy
     # cmp %cx, (e2) # reversed
-    jg e2_greaterThan_negDy
+    jge e2_greaterThan_negDy
     jmp e2_notGreaterThan_negDy
     e2_greaterThan_negDy:
-    movw (delta_y), %ax # moves err to ax
+    movw (delta_y), %ax # moves deltay to ax
     SUB (err), %ax  # err := err - dy ( notTarget (err) - target %ax (deltaY))
     movw %ax, (err) # save ax to err
     movw (x0), %ax # move x0 into register
@@ -270,7 +289,7 @@ cons_drawline:
 
     cmp (e2), %bx # (e2) is destination, %bx is source. if e2<dx
     # cmp %bx, (e2) #reversed
-    jl e2_lessThan_Dx
+    jle e2_lessThan_Dx
     jmp e2_notLessThan_Dx
     e2_lessThan_Dx:
     movw (err), %ax
@@ -290,7 +309,7 @@ real_start:
     movw    $boot_message, %si  # Display our boot message
     call    cons_writeline
 
-     call switch_to_vga
+    call switch_to_vga
 
     movw $15, %si # x0
     movw $15, %ax # y0
@@ -304,14 +323,14 @@ real_start:
     movw $200, %bx # x1
     movw $200, %cx # y1
     movb $4 , %dl # line_colour
-    # call cons_drawline
+    call cons_drawline
 
     movw $200, %si # x0
     movw $200, %ax # y0
     movw $10, %bx # x1
     movw $10, %cx # y1
     movb $13 , %dl # line_colour
-    # call cons_drawline
+    call cons_drawline
 
     
     movw $50, %si # x0
