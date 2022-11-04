@@ -38,6 +38,61 @@ cons_writeline:
     call    cons_write_crlf
     ret    
 
+# WRITE INTHEX CODE:
+HexChars:	.ascii "0123456789ABCDEF"
+# Output the value passed on the stack to the screen using the specified base
+#
+
+#define     number      6
+#define     base        4
+#define     endofstring -2
+
+cons_write_number:
+    pushw   %bp                 # Save existing frame pointer
+    movw    %sp, %bp            # Setup our frame pointer
+    subw    $18, %sp            # Reserve space for our string buffer
+    pushw   %ax                 # Save the registers we will trash
+    pushw   %bx
+    pushw   %cx
+    pushw   %dx
+    pushw   %si
+    pushw   %di
+
+    movw    %bp, %si
+    subw    $3, %si
+    movb    $0, endofstring(%bp)    # Insert end of string indicator (0)    
+    movw    number(%bp), %ax
+	
+getdigit:
+	xor		%dx, %dx                # Divide number by base
+	movw	base(%bp), %cx
+	div		%cx
+    movw    %dx, %di                # Convert remainder to hex character
+    movb    HexChars(%di), %dl      # and stpre in buffer
+	movb	%dl, (%si)
+	dec		%si
+	cmpw	$0, %ax                 # Have we extracted all digits?
+	jne		getdigit
+	inc		%si
+	call	cons_write              # Output the string
+
+    popw    %di                     # Restore the registers
+    popw    %si
+    popw    %dx
+    popw    %cx
+    popw    %bx
+    popw    %ax
+    movw    %bp, %sp                # Delete the local variables
+    popw    %bp
+    ret     $4                      # Return, removing paramters from stack
+
+
+	ret
+	
+IntBuffer:   .string "     "
+# END OF WRITE INTHEX CODE.
+
+
 switch_to_vga:
     movb $0, %ah
     movb $0x13, %al
@@ -68,13 +123,13 @@ delta_x:
     .word
 
 abs_function:
-# value to absolute is in ax
-cmp $0, %ax
-js abs_pos_ax
-neg %ax # negate %ax
-ret
-abs_pos_ax:
-ret
+    # value to absolute is in ax
+    cmp $0, %ax
+    jns abs_pos_ax
+    neg %ax # negate %ax
+    ret
+    abs_pos_ax:
+    ret
 
 setPixel:
      # call switch_to_vga
@@ -83,9 +138,9 @@ setPixel:
     movb $0, %bh # BH The video page number (should be set to 0)
     movw (x0), %cx # CX Column number (starting from 0)
     movw (y0), %dx # DX Row number (starting from 0)
-    int $0x10
-
-ret
+    # int $0x10
+    
+    ret
 
 cons_drawline:
     # draw a line between any two points on the screen using a specified colour. Each point has an x and y coordinate.
@@ -104,19 +159,36 @@ cons_drawline:
     xorw %dx, %dx
 
     # dx := abs(x1 - x0)
-    movw (x1), %ax
-    movw (x0), %bx
-    sub %ax, %bx # ax := (x1 - x0) 
-    movw %bx, %ax  # move absolute to %ax to work.
+    movw (x1), %bx
+    movw (x0), %ax
+    sub %bx, %ax # ax := (x1 - x0) 
     call abs_function # absolute and store ax to dx, which is in ax right now
     movw %ax, (delta_x) # store and save it in ax
+
+    push (delta_x)
+    pushw   $10
+    call    cons_write_number
+    call cons_write_crlf
+
+
     # dy := abs(y1 - y0)
-    movw (y1), %ax
-    movw (y0), %bx
-    sub %ax, %bx # dy := abs(y1 - y0) 
-    movw %bx, %ax  # move absolute to %ax to work.
+    movw (y1), %bx
+    movw (y0), %ax
+    sub %bx, %ax # dy := abs(y1 - y0) 
     call abs_function # absolute and store dy to cx, which is in ax right now
     movw %ax, (delta_y) # store and save it to %delta x
+
+   
+
+    # Checking if x0 y0 is right stub:
+    pushw    (delta_x)
+     pushw   $10
+    call    cons_write_number
+    call cons_write_crlf
+    pushw    (delta_y)
+     pushw   $10
+    call    cons_write_number
+    call cons_write_crlf
 
     # . if x0 < x1 then sx := 1 else sx := -1
     movw (x1), %ax
@@ -151,13 +223,21 @@ cons_drawline:
     draw:
 
     call setPixel # setPixel(0x,0y,colour)
+
+ #   pushw    (x0)
+ #    pushw   $10
+ #   call    cons_write_number
+ #   call cons_write_crlf
+  #  pushw    (y0)
+  #   pushw   $10
+  #  call    cons_write_number
+  #  call cons_write_crlf
    
     # . if x0 = x1 and y0 = y1 exit loop
     # is x equal
     movw (x1), %ax # move x1 to register so it can actualy be compared to x0
     cmp (x0), %ax # becase cmp can't take two literal memory adresses, one has to be moved into a register first.
     # 0x is destination, x1 is source. if zero flag is not set, jump.
-    # je end_draw # this is here to help see what is broken.
     jne xy_not_equal_cont  # . if x0 = x1, and y0 - y1, exit loop, so if it's not equal here (zf = 0), we can skip the y check.
     # is y equal
     movw (y1), %ax # move y1 to register so it can actualy be compared to y0
@@ -214,14 +294,14 @@ real_start:
     movw    $boot_message, %si  # Display our boot message
     call    cons_writeline
 
-    call switch_to_vga
+    # call switch_to_vga
 
     movw $15, %si # x0
     movw $15, %ax # y0
     movw $25, %bx # x1
     movw $25, %cx # y1
     movb $15 , %dl # line_colour
-    # call cons_drawline
+    call cons_drawline
 
     movw $10, %si # x0
     movw $10, %ax # y0
