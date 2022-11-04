@@ -70,10 +70,10 @@ delta_x:
 abs_function:
 # value to absolute is in ax
 cmp $0, %ax
-je abs_minus_ax
-ret
-abs_minus_ax:
+js abs_pos_ax
 neg %ax # negate %ax
+ret
+abs_pos_ax:
 ret
 
 setPixel:
@@ -106,13 +106,15 @@ cons_drawline:
     # dx := abs(x1 - x0)
     movw (x1), %ax
     movw (x0), %bx
-    sub %bx, %ax # ax := (x1 - x0)  
+    sub %ax, %bx # ax := (x1 - x0) 
+    movw %bx, %ax  # move absolute to %ax to work.
     call abs_function # absolute and store ax to dx, which is in ax right now
     movw %ax, (delta_x) # store and save it in ax
     # dy := abs(y1 - y0)
     movw (y1), %ax
     movw (y0), %bx
-    sub %bx, %ax # dy := abs(y1 - y0) 
+    sub %ax, %bx # dy := abs(y1 - y0) 
+    movw %bx, %ax  # move absolute to %ax to work.
     call abs_function # absolute and store dy to cx, which is in ax right now
     movw %ax, (delta_y) # store and save it to %delta x
 
@@ -142,8 +144,8 @@ cons_drawline:
     # err = dx - dy
     movw (delta_x), %ax
     movw (delta_y), %bx
-    sub %bx, %ax # err := dx - dy 
-    movw %ax, (err) 
+    sub %ax, %bx # err := dx - dy 
+    movw %bx, (err) 
 
 
     draw:
@@ -154,14 +156,12 @@ cons_drawline:
     # is x equal
     movw (x1), %ax # move x1 to register so it can actualy be compared to x0
     cmp (x0), %ax # becase cmp can't take two literal memory adresses, one has to be moved into a register first.
-    # cmp %ax, (x0) # reversed
     # 0x is destination, x1 is source. if zero flag is not set, jump.
     # je end_draw # this is here to help see what is broken.
     jne xy_not_equal_cont  # . if x0 = x1, and y0 - y1, exit loop, so if it's not equal here (zf = 0), we can skip the y check.
     # is y equal
     movw (y1), %ax # move y1 to register so it can actualy be compared to y0
     cmp (y0), %ax
-    # cmp %ax, (y0) # reversed
     # y0 is destination. y1 is source. if equal, zf is 1. if zf is 1, jump.
     je end_draw  # . y0 = y1 exit loop
     xy_not_equal_cont:
@@ -174,7 +174,6 @@ cons_drawline:
 
     # restore bx and cx to delta x and y at the start of the function that needs it
     movw (delta_y), %cx
-
     neg %cx
     
     cmp (e2), %cx # (e2) is destination, %cx is source. if e2> -dy
@@ -182,8 +181,8 @@ cons_drawline:
     jg e2_greaterThan_negDy
     jmp e2_notGreaterThan_negDy
     e2_greaterThan_negDy:
-    movw (err), %ax # moves err to ax
-    SUB (delta_y), %ax  # err := err - dy (target %ax - notTarget (deltaY))
+    movw (delta_y), %ax # moves err to ax
+    SUB (err), %ax  # err := err - dy ( notTarget (err) - target %ax (deltaY))
     movw %ax, (err) # save ax to err
     movw (x0), %ax # move x0 into register
     ADD (sx), %ax # add sx to al register
@@ -196,7 +195,7 @@ cons_drawline:
     cmp (e2), %bx # (e2) is destination, %bx is source. if e2<dx
     # cmp %bx, (e2) #reversed
     jl e2_lessThan_Dx
-    jmp e2_lessThan_Dx
+    jmp e2_notLessThan_Dx
     e2_lessThan_Dx:
     movw (err), %ax
     ADD (delta_x), %ax # err := err + dx
@@ -222,21 +221,21 @@ real_start:
     movw $25, %bx # x1
     movw $25, %cx # y1
     movb $15 , %dl # line_colour
-    call cons_drawline
+    # call cons_drawline
 
     movw $10, %si # x0
     movw $10, %ax # y0
     movw $200, %bx # x1
     movw $200, %cx # y1
     movb $4 , %dl # line_colour
-    call cons_drawline
+    # call cons_drawline
 
     movw $200, %si # x0
     movw $200, %ax # y0
     movw $10, %bx # x1
     movw $10, %cx # y1
     movb $13 , %dl # line_colour
-    call cons_drawline
+    # call cons_drawline
 
     
     movw $50, %si # x0
