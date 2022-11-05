@@ -257,7 +257,7 @@ cons_drawline:
     movw (delta_y), %cx
     neg %cx
     
-    cmp %cx, (e2) # (it does second > first.
+    cmp %cx, (e2) # (it does second > first.)
     # cmp (e2), %cx # reversed
     jg e2_greaterThan_negDy
     jmp e2_notGreaterThan_negDy
@@ -273,7 +273,7 @@ cons_drawline:
     # restore bx and cx to delta x and y
     movw (delta_x), %bx
 
-    cmp %bx, (e2)  # (e2) is destination, %bx is source. if e2<dx
+    cmp %bx, (e2) # (it does second > first.)
     # cmp (e2), %bx # reversed
     jl e2_lessThan_Dx
     jmp e2_notLessThan_Dx
