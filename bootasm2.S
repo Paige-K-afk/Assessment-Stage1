@@ -146,6 +146,7 @@ setPixel:
 cons_drawline:
     # draw a line between any two points on the screen using a specified colour. Each point has an x and y coordinate.
     # each point is a parameter.
+    
     movw %si, (x0)
     movw %ax, (y0)
     movw %bx, (x1)
@@ -184,36 +185,42 @@ cons_drawline:
     movw %ax, (delta_y) # store and save it to %delta x
 
 
-    # possible problems in the sx and sy getter sections.
+    # sx sy section (this has been fixed. no touchy)
     # . if x0 < x1 then sx := 1 else sx := -1
     movw (x0), %ax
     movw (x1), %bx
-    cmp %bx, %ax 
-    je x0_equal
+    movw $1, (sx)
+    cmp %bx, %ax  # (it does second < first.)
     jl x0_lessthan # if x0 < x1, cary flag wil be 1. jc jumps if cary flag = 1.
     movw $-1, (sx) # . else sx := -1 
-    jmp x0_done
-    x0_lessthan:
-    movw $1, (sx) # then sx := 1
-    jmp x0_done
-    x0_equal:
-    movw $0, (sx)
-    x0_done:
+    x0_lessthan: # then sx := 1 as it's unchanged.
 
     # . if y0 < y1 then sy := 1 else sy := -1
     movw (y0), %ax
     movw (y1), %bx
-    cmp %ax, %bx # destination bx (y0), source ax (y1)
-    je y0_equal
+    movw $1, (sy) 
+    cmp %bx, %ax  # (it does second < first.)
     jl y0_lessthan # if y0 < y1 , cary flag will be 1. jc jumps if cf = 1.
     movw $-1, (sy) # . else sy := -1 
-    jmp y0_done
-    y0_lessthan:
-    movw $1, (sy) # then sy := 1
-    jmp y0_done
-    y0_equal:
-    movw $0, (sy)
-    y0_done:
+    y0_lessthan: # then sy := 1 as it's unchanged
+
+#    pushw  (delta_x)
+#    push   $10
+#    call    cons_write_number
+#    call cons_write_crlf
+#    pushw  (delta_y)
+#    push   $10
+#    call cons_write_number
+#    call cons_write_crlf
+#    pushw  (sx)
+#    push   $10
+#    call    cons_write_number
+#    call cons_write_crlf
+#    pushw  (sy)
+#    push   $10
+#    call cons_write_number
+#    call cons_write_crlf
+#    call cons_write_crlf
 
     # err = dx - dy
     movw (delta_x), %ax
@@ -250,9 +257,9 @@ cons_drawline:
     movw (delta_y), %cx
     neg %cx
     
-    cmp (e2), %cx # (e2) is destination, %cx is source. if e2> -dy
-    # cmp %cx, (e2) # reversed
-    jge e2_greaterThan_negDy
+    cmp %cx, (e2) # (it does second > first.
+    # cmp (e2), %cx # reversed
+    jg e2_greaterThan_negDy
     jmp e2_notGreaterThan_negDy
     e2_greaterThan_negDy:
     movw (delta_y), %ax # moves deltay to ax
@@ -266,9 +273,9 @@ cons_drawline:
     # restore bx and cx to delta x and y
     movw (delta_x), %bx
 
-    cmp (e2), %bx # (e2) is destination, %bx is source. if e2<dx
-    # cmp %bx, (e2) #reversed
-    jle e2_lessThan_Dx
+    cmp %bx, (e2)  # (e2) is destination, %bx is source. if e2<dx
+    # cmp (e2), %bx # reversed
+    jl e2_lessThan_Dx
     jmp e2_notLessThan_Dx
     e2_lessThan_Dx:
     movw (err), %ax
@@ -288,13 +295,20 @@ real_start:
     movw    $boot_message, %si  # Display our boot message
     call    cons_writeline
 
-   call switch_to_vga
+    call switch_to_vga
 
     movw $5, %si # x0
     movw $5, %ax # y0
     movw $5, %bx # x1
     movw $5, %cx # y1
     movb $13 , %dl # line_colour
+    call cons_drawline
+
+    movw $15, %si # x0
+    movw $15, %ax # y0
+    movw $25, %bx # x1
+    movw $25, %cx # y1
+    movb $15 , %dl # line_colour
     call cons_drawline
 
     movw $0, %si # x0
@@ -318,12 +332,7 @@ real_start:
     movb $15 , %dl # line_colour
     call cons_drawline
 
-    movw $15, %si # x0
-    movw $15, %ax # y0
-    movw $25, %bx # x1
-    movw $25, %cx # y1
-    movb $15 , %dl # line_colour
-    call cons_drawline
+
 
     movw $10, %si # x0
     movw $10, %ax # y0
@@ -362,3 +371,7 @@ endless_loop:                   # Loop forever more
 boot_message:     
     .string "Boot Loader Stage 2 loaded"             
 
+testmessage:
+    .string "15 is less"
+testmessage2:
+    .string "25 is less"
