@@ -259,7 +259,7 @@ cons_drawline:
     
     cmp %cx, (e2) # (it does second > first.)
     # cmp (e2), %cx # reversed
-    jg e2_greaterThan_negDy
+    jg e2_greaterThan_negDy # if this is jge, it'll make it to yellow, then fill the screen with yellow as a diagonal.
     jmp e2_notGreaterThan_negDy
     e2_greaterThan_negDy:
     movw (delta_y), %ax # moves deltay to ax
@@ -275,7 +275,7 @@ cons_drawline:
 
     cmp %bx, (e2) # (it does second > first.)
     # cmp (e2), %bx # reversed
-    jl e2_lessThan_Dx
+    jl e2_lessThan_Dx # if jle, it tries to make vertical lines, giving the screen a bunch of widely spaced vertical lines.
     jmp e2_notLessThan_Dx
     e2_lessThan_Dx:
     movw (err), %ax
@@ -297,6 +297,7 @@ real_start:
 
     call switch_to_vga
 
+    # The dot
     movw $5, %si # x0
     movw $5, %ax # y0
     movw $5, %bx # x1
@@ -304,6 +305,7 @@ real_start:
     movb $13 , %dl # line_colour
     call cons_drawline
 
+    # Short white line 1
     movw $15, %si # x0
     movw $15, %ax # y0
     movw $25, %bx # x1
@@ -311,6 +313,31 @@ real_start:
     movb $15 , %dl # line_colour
     call cons_drawline
 
+    # Short while line 2
+    movw $25, %si # x0
+    movw $15, %ax # y0
+    movw $15, %bx # x1
+    movw $25, %cx # y1
+    movb $15 , %dl # line_colour
+    call cons_drawline
+
+    # Long red line
+    movw $100, %si # x0
+    movw $100, %ax # y0
+    movw $200, %bx # x1
+    movw $200, %cx # y1
+    movb $4 , %dl # line_colour
+    call cons_drawline
+
+    # Long light magenta line
+    movw $200, %si # x0
+    movw $100, %ax # y0
+    movw $100, %bx # x1
+    movw $200, %cx # y1
+    movb $13 , %dl # line_colour
+    call cons_drawline
+
+    # Horisontal green line
     movw $0, %si # x0
     movw $0, %ax # y0
     movw $10, %bx # x1
@@ -318,37 +345,15 @@ real_start:
     movb $10 , %dl # line_colour
     call cons_drawline
 
+    # vertical yellow line
     movw $0, %si # x0
     movw $0, %ax # y0
     movw $0, %bx # x1
     movw $11, %cx # y1
     movb $14 , %dl # line_colour
     call cons_drawline
-
-    movw $25, %si # x0
-    movw $25, %ax # y0
-    movw $15, %bx # x1
-    movw $15, %cx # y1
-    movb $15 , %dl # line_colour
-    call cons_drawline
-
-
-
-    movw $10, %si # x0
-    movw $10, %ax # y0
-    movw $200, %bx # x1
-    movw $200, %cx # y1
-    movb $4 , %dl # line_colour
-    call cons_drawline
-
-    movw $200, %si # x0
-    movw $200, %ax # y0
-    movw $10, %bx # x1
-    movw $10, %cx # y1
-    movb $13 , %dl # line_colour
-    call cons_drawline
-
     
+    # Horisontal light cyan line
     movw $50, %si # x0
     movw $50, %ax # y0
     movw $100, %bx # x1
@@ -356,12 +361,37 @@ real_start:
     movb $11 , %dl # line_colour
     call cons_drawline
     
+    # Horisontal yellow line
     movw $50, %si # x0
     movw $40, %ax # y0
     movw $100, %bx # x1
     movw $40, %cx # y1
     movb $14 , %dl # line_colour
     call cons_drawline
+
+    # short diagonal magenta line
+    movw $150, %si # x0
+    movw $150, %ax # y0
+    movw $160, %bx # x1
+    movw $160, %cx # y1
+    movb $5 , %dl # line_colour
+    call cons_drawline
+
+    # diagonal Light red line
+    movw $150, %si # x0
+    movw $50, %ax # y0
+    movw $180, %bx # x1
+    movw $80, %cx # y1
+    movb $12 , %dl # line_colour
+    call cons_drawline
+
+    # diagonal Light blue line
+    movw $10, %si # x0
+    movw $150, %ax # y0
+    movw $20, %bx # x1
+    movw $180, %cx # y1
+    movb $9 , %dl # line_colour
+
 
 endless_loop:                   # Loop forever more
     jmp     endless_loop    
