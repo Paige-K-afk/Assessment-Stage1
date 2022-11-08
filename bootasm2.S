@@ -225,7 +225,8 @@ cons_drawline:
     # err = dx - dy
     movw (delta_x), %ax
     movw (delta_y), %bx
-    sub %ax, %bx # err := dx - dy 
+    neg %bx 
+    ADD %ax, %bx # err := dx - dy 
     movw %bx, (err) 
 
     draw:
