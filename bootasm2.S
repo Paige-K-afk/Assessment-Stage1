@@ -251,8 +251,6 @@ cons_drawline:
     imul %dx  # %dx stores e2 which is :  e2 := 2 * err. result is in ax.
     movw %ax, (e2) # move the target of mul to e2.
 
-
-    # issues start here.
     # restore bx and cx to delta x and y at the start of the function that needs it
     movw (delta_y), %cx
     neg %cx
@@ -261,15 +259,17 @@ cons_drawline:
     # cmp (e2), %cx # reversed
     jg e2_greaterThan_negDy # if this is jge, it'll make it to yellow, then fill the screen with yellow as a diagonal.
     jmp e2_notGreaterThan_negDy
-    e2_greaterThan_negDy:
-    movw (delta_y), %ax # moves deltay to ax
-    SUB (err), %ax  # err := err - dy ( notTarget (err) - target %ax (deltaY)) # could change to ADD (err), %cx # as %cx is our negated delta_y
+    e2_greaterThan_negDy:   
+    movw (err), %ax
+    # by adding err and negative dy, we save ourselves the trouble of figuring out which way around this needs to be.
+    ADD %cx, %ax  # err := err - dy ( notTarget (err) - target %ax (deltaY))
     movw %ax, (err) # save ax to err
     movw (x0), %ax # move x0 into register
     ADD (sx), %ax # add sx to al register
     movw %ax, (x0) # move new result back into x0
     e2_notGreaterThan_negDy: # end if
     
+    # issues start here.
     # restore bx and cx to delta x and y
     movw (delta_x), %bx
 
@@ -295,7 +295,7 @@ real_start:
     movw    $boot_message, %si  # Display our boot message
     call    cons_writeline
 
-    call switch_to_vga
+     call switch_to_vga
 
     # The dot
     movw $5, %si # x0
