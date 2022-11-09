@@ -338,6 +338,21 @@ real_start:
     movb $13 , %dl # line_colour
     call cons_drawline
 
+    # diagonal Light red line (x=y)
+    movw $150, %si # x0
+    movw $50, %ax # y0
+    movw $180, %bx # x1
+    movw $80, %cx # y1
+    movb $12 , %dl # line_colour
+    call cons_drawline
+
+    # diagonal Light blue line
+    movw $100, %si # x0
+    movw $50, %ax # y0
+    movw $120, %bx # x1
+    movw $180, %cx # y1
+    movb $13 , %dl # line_colour
+
     # Horisontal green line
     movw $0, %si # x0
     movw $0, %ax # y0
@@ -378,20 +393,7 @@ real_start:
     movb $5 , %dl # line_colour
     call cons_drawline
 
-    # diagonal Light red line
-    movw $150, %si # x0
-    movw $50, %ax # y0
-    movw $180, %bx # x1
-    movw $80, %cx # y1
-    movb $12 , %dl # line_colour
-    call cons_drawline
 
-    # diagonal Light blue line
-    movw $10, %si # x0
-    movw $150, %ax # y0
-    movw $20, %bx # x1
-    movw $180, %cx # y1
-    movb $9 , %dl # line_colour
 
 
 endless_loop:                   # Loop forever more
