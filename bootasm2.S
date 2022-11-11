@@ -147,62 +147,62 @@ cons_drawline:
     # draw a line between any two points on the screen using a specified colour. Each point has an x and y coordinate.
     # each point is a parameter.
     
-    movw %si, (x0)
-    movw %ax, (y0)
-    movw %bx, (x1)
-    movw %cx, (y1)
-    movb %dl, (line_colour)
+    movw    %si,    (x0)
+    movw    %ax,    (y0)
+    movw    %bx,    (x1)
+    movw    %cx,    (y1)
+    movb    %dl,    (line_colour)
 
     # clear registers as we're pulling from the variables from now on.
-    xorw %si, %si
-    xorw %ax, %ax
-    xorw %bx, %bx
-    xorw %cx, %cx
-    xorw %dx, %dx
+    xorw    %si,    %si
+    xorw    %ax,    %ax
+    xorw    %bx,    %bx
+    xorw    %cx,    %cx
+    xorw    %dx,    %dx
 
     # dx := abs(x1 - x0)
-    movw (x1), %bx
-    movw (x0), %ax
-    sub %bx, %ax # ax := (x1 - x0) 
+    movw    (x1),   %bx
+    movw    (x0),   %ax
+    sub     %bx,    %ax         # ax := (x1 - x0) 
     # better equivalent of call abs_function # absolute and store ax to dx, which is in ax right now
-    cmp $0, %ax
+    cmp     $0,     %ax
     jns xabs_pos_ax
-    movw $-1, %dx
-    imul %dx # negate %ax (mul's do ax * target, store in ax)
+    movw    $-1,    %dx
+    imul    %dx                 # negate %ax (mul's do ax * target, store in ax)
     xabs_pos_ax:
-    movw %ax, (delta_x) # store and save it in ax
+    movw    %ax,    (delta_x)   # store and save it in ax
 
     # dy := abs(y1 - y0)
-    movw (y1), %bx
-    movw (y0), %ax
-    sub %bx, %ax # dy := abs(y1 - y0) 
+    movw    (y1),   %bx
+    movw    (y0),   %ax
+    sub     %bx,    %ax    # dy := abs(y1 - y0) 
     # better equivalent of call abs_function # absolute and store dy to cx, which is in ax right now
-    cmp $0, %ax
+    cmp     $0,     %ax
     jns yabs_pos_ax
-    movw $-1, %dx
-    imul %dx # negate %ax (mul's do ax * target, store in ax)
+    movw    $-1,    %dx
+    imul    %dx             # negate %ax (mul's do ax * target, store in ax)
     yabs_pos_ax:
-    movw %ax, (delta_y) # store and save it to %delta x
+    movw    %ax,    (delta_y) # store and save it to %delta x
 
 
     # sx sy section (this has been fixed. no touchy)
     # . if x0 < x1 then sx := 1 else sx := -1
-    movw (x0), %ax
-    movw (x1), %bx
-    movw $1, (sx)
-    cmp %bx, %ax  # (it does second < first.)
-    jl x0_lessthan # if x0 < x1, cary flag wil be 1. jc jumps if cary flag = 1.
-    movw $-1, (sx) # . else sx := -1 
-    x0_lessthan: # then sx := 1 as it's unchanged.
+    movw    (x0),   %ax
+    movw    (x1),   %bx
+    movw    $1,     (sx)
+    cmp     %bx,    %ax     # (it does second < first.)
+    jl  x0_lessthan         # if x0 < x1, cary flag wil be 1. jc jumps if cary flag = 1.
+    movw    $-1,    (sx)    # . else sx := -1 
+    x0_lessthan:            # then sx := 1 as it's unchanged.
 
     # . if y0 < y1 then sy := 1 else sy := -1
-    movw (y0), %ax
-    movw (y1), %bx
-    movw $1, (sy) 
-    cmp %bx, %ax  # (it does second < first.)
-    jl y0_lessthan # if y0 < y1 , cary flag will be 1. jc jumps if cf = 1.
-    movw $-1, (sy) # . else sy := -1 
-    y0_lessthan: # then sy := 1 as it's unchanged
+    movw    (y0),   %ax
+    movw    (y1),   %bx
+    movw    $1,     (sy) 
+    cmp     %bx,    %ax     # (it does second < first.)
+    jl  y0_lessthan         # if y0 < y1 , cary flag will be 1. jc jumps if cf = 1.
+    movw    $-1,    (sy)    # . else sy := -1 
+    y0_lessthan:            # then sy := 1 as it's unchanged
 
 #    pushw  (delta_x)
 #    push   $10
@@ -223,11 +223,11 @@ cons_drawline:
 #    call cons_write_crlf
 
     # err = dx - dy
-    movw (delta_x), %ax
-    movw (delta_y), %bx
-    neg %bx 
-    ADD %ax, %bx # err := dx - dy 
-    movw %bx, (err) 
+    movw    (delta_x),  %ax
+    movw    (delta_y),  %bx
+    neg     %bx 
+    ADD     %ax,        %bx     # err := dx - dy 
+    movw    %bx,        (err) 
 
     draw:
 
@@ -235,15 +235,15 @@ cons_drawline:
    
     # . if x0 = x1 and y0 = y1 exit loop
     # is x equal
-    movw (x1), %ax # move x1 to register so it can actualy be compared to x0
-    cmp (x0), %ax # becase cmp can't take two literal memory adresses, one has to be moved into a register first.
+    movw    (x1),   %ax     # move x1 to register so it can actualy be compared to x0
+    cmp     (x0),   %ax     # becase cmp can't take two literal memory adresses, one has to be moved into a register first.
     # 0x is destination, x1 is source. if zero flag is not set, jump.
-    jne xy_not_equal_cont  # . if x0 = x1, and y0 - y1, exit loop, so if it's not equal here (zf = 0), we can skip the y check.
+    jne xy_not_equal_cont   # . if x0 = x1, and y0 - y1, exit loop, so if it's not equal here (zf = 0), we can skip the y check.
     # is y equal
-    movw (y1), %ax # move y1 to register so it can actualy be compared to y0
-    cmp (y0), %ax
+    movw    (y1),   %ax     # move y1 to register so it can actualy be compared to y0
+    cmp     (y0),   %ax
     # y0 is destination. y1 is source. if equal, zf is 1. if zf is 1, jump.
-    je end_draw  # . y0 = y1 exit loop
+    je  end_draw            # . y0 = y1 exit loop
     xy_not_equal_cont:
 
     # calculate e2
