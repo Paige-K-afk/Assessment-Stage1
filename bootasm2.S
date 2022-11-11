@@ -124,22 +124,22 @@ delta_x:
 
 abs_function:
     # value to absolute is in ax. Load bearing useless function.
-    cmp $0, %ax
-    jns abs_pos_ax
-    movw $-1, %dx
-    imul %dx # negate %ax (mul's do ax * target, store in ax)
+    cmp     $0,     %ax
+    jns     abs_pos_ax
+    movw    $-1,    %dx
+    imul    %dx             # negate %ax (mul's do ax * target, store in ax)
     ret
     abs_pos_ax:
     ret
 
 setPixel:
      # call switch_to_vga
-    movb $0x0C, %ah     # AH 0x0C
-    movb (line_colour), %al # AL The colour for the pixel (see below)
-    movb $0, %bh # BH The video page number (should be set to 0)
-    movw (x0), %cx # CX Column number (starting from 0)
-    movw (y0), %dx # DX Row number (starting from 0)
-    int $0x10
+    movb    $0x0C,  %ah         # AH 0x0C
+    movb    (line_colour), %al  # AL The colour for the pixel (see below)
+    movb    $0,     %bh         # BH The video page number (should be set to 0)
+    movw    (x0),   %cx         # CX Column number (starting from 0)
+    movw    (y0),   %dx         # DX Row number (starting from 0)
+    int     $0x10
     
     ret
 
