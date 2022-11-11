@@ -299,98 +299,98 @@ real_start:
      call switch_to_vga
 
     # The dot
-    movw $5, %si # x0
-    movw $5, %ax # y0
-    movw $5, %bx # x1
-    movw $5, %cx # y1
-    movb $13 , %dl # line_colour
+    movw    $5,    %si     # x0
+    movw    $5,    %ax     # y0
+    movw    $5,    %bx     # x1
+    movw    $5,    %cx     # y1
+    movb    $13,   %dl     # line_colour
     call cons_drawline
 
     # Short white line 1
-    movw $15, %si # x0
-    movw $15, %ax # y0
-    movw $25, %bx # x1
-    movw $25, %cx # y1
-    movb $15 , %dl # line_colour
+    movw    $15,   %si     # x0
+    movw    $15,   %ax     # y0
+    movw    $25,   %bx     # x1
+    movw    $25,   %cx     # y1
+    movb    $15,   %dl     # line_colour
     call cons_drawline
 
     # Short while line 2
-    movw $25, %si # x0
-    movw $15, %ax # y0
-    movw $15, %bx # x1
-    movw $25, %cx # y1
-    movb $15 , %dl # line_colour
+    movw    $25,   %si     # x0
+    movw    $15,   %ax     # y0
+    movw    $15,   %bx     # x1
+    movw    $25,   %cx     # y1
+    movb    $15,   %dl     # line_colour
     call cons_drawline
 
     # Long red line
-    movw $100, %si # x0
-    movw $100, %ax # y0
-    movw $200, %bx # x1
-    movw $200, %cx # y1
-    movb $4 , %dl # line_colour
+    movw    $100,  %si     # x0
+    movw    $100,  %ax     # y0
+    movw    $200,  %bx     # x1
+    movw    $200,  %cx     # y1
+    movb    $4,    %dl     # line_colour
     call cons_drawline
 
     # Long light magenta line
-    movw $200, %si # x0
-    movw $100, %ax # y0
-    movw $100, %bx # x1
-    movw $200, %cx # y1
-    movb $13 , %dl # line_colour
+    movw    $200,  %si     # x0
+    movw    $100,  %ax     # y0
+    movw    $100,  %bx     # x1
+    movw    $200,  %cx     # y1
+    movb    $13,   %dl     # line_colour
     call cons_drawline
 
     # diagonal Light red line (x=y)
-    movw $150, %si # x0
-    movw $50, %ax # y0
-    movw $180, %bx # x1
-    movw $80, %cx # y1
-    movb $12 , %dl # line_colour
+    movw    $150,  %si     # x0
+    movw    $50,   %ax     # y0
+    movw    $180,  %bx     # x1
+    movw    $80,   %cx     # y1
+    movb    $12,   %dl     # line_colour
     call cons_drawline
 
     # diagonal Light blue line
-    movw $100, %si # x0
-    movw $50, %ax # y0
-    movw $120, %bx # x1
-    movw $180, %cx # y1
-    movb $13 , %dl # line_colour
+    movw    $100,  %si     # x0
+    movw    $50,   %ax     # y0
+    movw    $120,  %bx     # x1
+    movw    $180,  %cx     # y1
+    movb    $13 ,  %dl     # line_colour
 
     # Horisontal green line
-    movw $0, %si # x0
-    movw $0, %ax # y0
-    movw $10, %bx # x1
-    movw $0, %cx # y1
-    movb $10 , %dl # line_colour
+    movw    $0,    %si     # x0
+    movw    $0,    %ax     # y0
+    movw    $10,   %bx     # x1
+    movw    $0,    %cx     # y1
+    movb    $10,   %dl     # line_colour
     call cons_drawline
 
     # vertical yellow line
-    movw $0, %si # x0
-    movw $0, %ax # y0
-    movw $0, %bx # x1
-    movw $11, %cx # y1
-    movb $14 , %dl # line_colour
+    movw    $0,    %si     # x0
+    movw    $0,    %ax     # y0
+    movw    $0,    %bx     # x1
+    movw    $11,   %cx     # y1
+    movb    $14,   %dl     # line_colour
     call cons_drawline
     
     # Horisontal light cyan line
-    movw $50, %si # x0
-    movw $50, %ax # y0
-    movw $100, %bx # x1
-    movw $50, %cx # y1
-    movb $11 , %dl # line_colour
+    movw    $50,   %si     # x0
+    movw    $50,   %ax     # y0
+    movw    $100,  %bx     # x1
+    movw    $50,   %cx     # y1
+    movb    $11,   %dl     # line_colour
     call cons_drawline
     
     # Horisontal yellow line
-    movw $50, %si # x0
-    movw $40, %ax # y0
-    movw $100, %bx # x1
-    movw $40, %cx # y1
-    movb $14 , %dl # line_colour
+    movw    $50,   %si     # x0
+    movw    $40,   %ax     # y0
+    movw    $100,  %bx     # x1
+    movw    $40,   %cx     # y1
+    movb    $14,   %dl     # line_colour
     call cons_drawline
 
     # short diagonal magenta line
-    movw $150, %si # x0
-    movw $150, %ax # y0
-    movw $160, %bx # x1
-    movw $160, %cx # y1
-    movb $5 , %dl # line_colour
+    movw    $150,  %si     # x0
+    movw    $150,  %ax     # y0
+    movw    $160,  %bx     # x1
+    movw    $160,  %cx     # y1
+    movb    $5,    %dl     # line_colour
     call cons_drawline
 
 
