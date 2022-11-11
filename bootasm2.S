@@ -247,45 +247,45 @@ cons_drawline:
     xy_not_equal_cont:
 
     # calculate e2
-    movw (err), %dx
-    movw $2, %ax
-    imul %dx  # %dx stores e2 which is :  e2 := 2 * err. result is in ax.
-    movw %ax, (e2) # move the target of mul to e2.
+    movw    (err),  %dx
+    movw    $2,     %ax
+    imul    %dx             # %dx stores e2 which is :  e2 := 2 * err. result is in ax.
+    movw    %ax,    (e2)    # move the target of mul to e2.
 
     # restore bx and cx to delta x and y at the start of the function that needs it
-    movw (delta_y), %cx
-    neg %cx
+    movw    (delta_y),  %cx
+    neg     %cx
     
-    cmp %cx, (e2) # (it does second > first.)
+    cmp     %cx,    (e2)    # (it does second > first.)
     # cmp (e2), %cx # reversed
-    jg e2_greaterThan_negDy # if this is jge, it'll make it to yellow, then fill the screen with yellow as a diagonal.
+    jg  e2_greaterThan_negDy # if this is jge, it'll make it to yellow, then fill the screen with yellow as a diagonal.
     jmp e2_notGreaterThan_negDy
     e2_greaterThan_negDy:   
-    movw (err), %ax
+    movw    (err),  %ax
     # by adding err and negative dy, we save ourselves the trouble of figuring out which way around this needs to be.
-    ADD %cx, %ax  # err := err - dy ( notTarget (err) - target %ax (deltaY))
-    movw %ax, (err) # save ax to err
-    movw (x0), %ax # move x0 into register
-    ADD (sx), %ax # add sx to al register
-    movw %ax, (x0) # move new result back into x0
+    ADD     %cx,    %ax     # err := err - dy ( notTarget (err) - target %ax (deltaY))
+    movw    %ax,    (err)   # save ax to err
+    movw    (x0),   %ax     # move x0 into register
+    ADD     (sx),   %ax     # add sx to al register
+    movw    %ax,    (x0)    # move new result back into x0
     e2_notGreaterThan_negDy: # end if
     
     # issues start here.
     # restore bx and cx to delta x and y
-    movw (delta_x), %bx
+    movw    (delta_x),  %bx
 
     cmp %bx, (e2) # (it does second > first.)
     # cmp (e2), %bx # reversed
-    jl e2_lessThan_Dx # if jle, it tries to make vertical lines, giving the screen a bunch of widely spaced vertical lines.
+    jl  e2_lessThan_Dx # if jle, it tries to make vertical lines, giving the screen a bunch of widely spaced vertical lines.
     jmp e2_notLessThan_Dx
     e2_lessThan_Dx:
-    movw (err), %ax
-    ADD (delta_x), %ax # err := err + dx
-    movw %ax, (err)
-    movw (y0), %ax # move y0 into register
-    ADD (sy), %ax # add sy to ax register 
-    movw %ax, (y0) # move ax back into y0
-    e2_notLessThan_Dx: # end if
+    movw    (err),   %ax
+    ADD     (delta_x), %ax  # err := err + dx
+    movw    %ax,    (err)
+    movw    (y0),   %ax     # move y0 into register
+    ADD     (sy),   %ax     # add sy to ax register 
+    movw    %ax,    (y0)    # move ax back into y0
+    e2_notLessThan_Dx:      # end if
 
     jmp draw
     end_draw:
