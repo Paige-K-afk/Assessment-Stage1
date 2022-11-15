@@ -140,6 +140,16 @@ cons_drawline:
     imul    %dx                 # negate %ax (mul's do ax * target, store in ax)
     xabs_pos_ax:
     movw    %ax,    (delta_x)   # store and save it in ax
+    
+    # DEBUG OUTPUT START
+#    pushw  (delta_x)
+#    push   $10
+#    call    cons_write_number
+#    call cons_write_crlf
+    # DEBUG OUTPUT END
+    xorw    %ax,    %ax
+    xorw    %bx,    %bx
+    xorw    %dx,    %dx
 
     # dy := abs(y1 - y0)
     movw    (y1),   %bx
@@ -152,8 +162,8 @@ cons_drawline:
     movw    $-1,    %dx
     imul    %dx             # negate %ax (mul's do ax * target, store in ax)
     yabs_pos_ax:
-    movw    %ax,    (delta_y) # store and save it to %delta x
-
+    movw    %ax,    (delta_y) # store and save it to %delta y
+    
 
     # sx sy section (this has been fixed. no touchy)
     # . if x0 < x1 then sx := 1 else sx := -1
@@ -174,25 +184,28 @@ cons_drawline:
     movw    $-1,    (sy)    # . else sy := -1 
     y0_lessthan:            # then sy := 1 as it's unchanged
 
-    pushw  (delta_x)
-    push   $10
-    call    cons_write_number
-    movw    $blankmessage1, %si 
-    call    cons_write
-    pushw  (delta_y)
-    push   $10
-    call cons_write_number
-    movw    $blankmessage1, %si 
-    call    cons_write
-    pushw  (sx)
-    push   $10
-    call    cons_write_number
-    movw    $blankmessage1, %si 
-    call    cons_write
-    pushw  (sy)
-    push   $10
-    call cons_write_number
-    call cons_write_crlf
+    # DEBUG OUTPUT START
+    # movw $555, (delta_x)
+#    pushw  (delta_x)
+#    push   $10
+#    call    cons_write_number
+#    movw    $blankmessage1, %si 
+#    call    cons_write
+#    pushw  (delta_y)
+#    push   $10
+#    call cons_write_number
+#    movw    $blankmessage1, %si 
+#    call    cons_write
+#    pushw  (sx)
+#    push   $10
+#    call    cons_write_number
+#    movw    $blankmessage1, %si 
+#    call    cons_write
+#    pushw  (sy)
+#    push   $10
+#    call cons_write_number
+#    call cons_write_crlf
+        # DEBUG OUTPUT END
 
     # err = dx - dy
     movw    (delta_x),  %ax
@@ -268,7 +281,15 @@ real_start:
     movw    $boot_message, %si  # Display our boot message
     call    cons_writeline
 
-    # call switch_to_vga
+    call switch_to_vga
+
+     # diagonal Light blue line 1
+    movw    $100,  %si     # x0
+    movw    $50,   %ax     # y0
+    movw    $120,  %bx     # x1
+    movw    $180,  %cx     # y1
+    movb    $9 ,  %dl     # line_colour
+    call cons_drawline
 
     # The dot
     movw    $5,    %si     # x0
@@ -318,13 +339,14 @@ real_start:
     movb    $12,   %dl     # line_colour
     call cons_drawline
 
-    # diagonal Light blue line
+    # diagonal Light blue line 2
     movw    $100,  %si     # x0
-    movw    $50,   %ax     # y0
+    movw    $180,   %ax     # y0
     movw    $120,  %bx     # x1
-    movw    $180,  %cx     # y1
+    movw    $50,  %cx     # y1
     movb    $9 ,  %dl     # line_colour
     call cons_drawline
+    
 
     # Horisontal green line
     movw    $0,    %si     # x0
@@ -360,9 +382,9 @@ real_start:
 
     # short diagonal magenta line
     movw    $150,  %si     # x0
-    movw    $150,  %ax     # y0
+    movw    $180,  %ax     # y0
     movw    $160,  %bx     # x1
-    movw    $160,  %cx     # y1
+    movw    $200,  %cx     # y1
     movb    $5,    %dl     # line_colour
     call cons_drawline
 
@@ -402,6 +424,6 @@ err:
 e2:
     .word 0
 delta_y:
-    .word
+    .word 0
 delta_x:
-    .word
+    .word 0
