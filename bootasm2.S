@@ -132,8 +132,9 @@ cons_drawline:
     movw    (x1),   %bx
     movw    (x0),   %ax
     sub     %ax,    %bx         # ax := (x1 - x0)   SUB ax, bx is the equivalent of bx = bx-ax
-    # better equivalent of calling absfunction # absolute and store ax to dx, which is in ax right now
-    cmp     $0,     %ax
+    movw    %bx,    %ax     # move answer to ax for multiplication.
+    # below is a better equivalent of calling absfunction # absolute and store ax to dx, which is in ax right now
+    cmp     $0,     %ax         # cmp ax, bx is the equivalent of bx-ax
     jns xabs_pos_ax
     movw    $-1,    %dx
     imul    %dx                 # negate %ax (mul's do ax * target, store in ax)
@@ -143,8 +144,9 @@ cons_drawline:
     # dy := abs(y1 - y0)
     movw    (y1),   %bx
     movw    (y0),   %ax
-    sub     %ax,    %bx    # dy := abs(y1 - y0) SUB ax, bx is the equivalent of bx = bx-ax
-    # better equivalent of calling absfunction # absolute and store dy to cx, which is in ax right now
+    sub     %ax,    %bx     # dy := abs(y1 - y0) SUB ax, bx is the equivalent of bx = bx-ax
+    movw    %bx,    %ax     # move answer to ax for multiplication.
+    # below is a better equivalent of calling absfunction # absolute and store dy to cx, which is in ax right now
     cmp     $0,     %ax
     jns yabs_pos_ax
     movw    $-1,    %dx
@@ -172,23 +174,25 @@ cons_drawline:
     movw    $-1,    (sy)    # . else sy := -1 
     y0_lessthan:            # then sy := 1 as it's unchanged
 
-#    pushw  (delta_x)
-#    push   $10
-#    call    cons_write_number
-#    call cons_write_crlf
-#    pushw  (delta_y)
-#    push   $10
-#    call cons_write_number
-#    call cons_write_crlf
-#    pushw  (sx)
-#    push   $10
-#    call    cons_write_number
-#    call cons_write_crlf
-#    pushw  (sy)
-#    push   $10
-#    call cons_write_number
-#    call cons_write_crlf
-#    call cons_write_crlf
+    pushw  (delta_x)
+    push   $10
+    call    cons_write_number
+    movw    $blankmessage1, %si 
+    call    cons_write
+    pushw  (delta_y)
+    push   $10
+    call cons_write_number
+    movw    $blankmessage1, %si 
+    call    cons_write
+    pushw  (sx)
+    push   $10
+    call    cons_write_number
+    movw    $blankmessage1, %si 
+    call    cons_write
+    pushw  (sy)
+    push   $10
+    call cons_write_number
+    call cons_write_crlf
 
     # err = dx - dy
     movw    (delta_x),  %ax
@@ -264,7 +268,7 @@ real_start:
     movw    $boot_message, %si  # Display our boot message
     call    cons_writeline
 
-     call switch_to_vga
+    # call switch_to_vga
 
     # The dot
     movw    $5,    %si     # x0
@@ -319,7 +323,8 @@ real_start:
     movw    $50,   %ax     # y0
     movw    $120,  %bx     # x1
     movw    $180,  %cx     # y1
-    movb    $13 ,  %dl     # line_colour
+    movb    $9 ,  %dl     # line_colour
+    call cons_drawline
 
     # Horisontal green line
     movw    $0,    %si     # x0
@@ -376,6 +381,8 @@ testmessage:
     .string "15 is less"
 testmessage2:
     .string "25 is less"
+blankmessage1:
+    .string " - "
 x0:
     .word 0
 y0:
