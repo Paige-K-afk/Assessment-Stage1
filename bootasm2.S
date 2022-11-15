@@ -381,14 +381,52 @@ real_start:
     call cons_drawline
 
     # short diagonal magenta line
-    movw    $150,  %si     # x0
+    movw    $200,  %si     # x0
     movw    $180,  %ax     # y0
-    movw    $160,  %bx     # x1
+    movw    $210,  %bx     # x1
     movw    $200,  %cx     # y1
     movb    $5,    %dl     # line_colour
     call cons_drawline
 
+    # diagonal magenta line 2
+    movw    $200,  %si     # x0
+    movw    $8,  %ax     # y0
+    movw    $220,  %bx     # x1
+    movw    $15,  %cx     # y1
+    movb    $5,    %dl     # line_colour
+    call cons_drawline
 
+    # Vertical red line
+    movw    $250,  %si     # x0
+    movw    $5,  %ax     # y0
+    movw    $250,  %bx     # x1
+    movw    $50,  %cx     # y1
+    movb    $4,    %dl     # line_colour
+    call cons_drawline
+
+    # Vertical pink line
+    movw    $255,  %si     # x0
+    movw    $50,  %ax     # y0
+    movw    $255,  %bx     # x1
+    movw    $5,  %cx     # y1
+    movb    $13,    %dl     # line_colour
+    call cons_drawline
+
+    # diagonal Light red line 
+    movw    $250,  %si     # x0
+    movw    $150,   %ax     # y0
+    movw    $280,  %bx     # x1
+    movw    $80,   %cx     # y1
+    movb    $12,   %dl     # line_colour
+    call cons_drawline
+
+    # diagonal green line 
+    movw    $280,  %si     # x0
+    movw    $160,   %ax     # y0
+    movw    $250,  %bx     # x1
+    movw    $80,   %cx     # y1
+    movb    $10,   %dl     # line_colour
+    call cons_drawline
 
 
 endless_loop:                   # Loop forever more
