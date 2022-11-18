@@ -92,11 +92,20 @@ getdigit:
 IntBuffer:   .string "     "
 # END OF WRITE INTHEX CODE.
 
+abs_function:
+    # absolutes the value in ax
+    cmp     $0,     %ax         # cmp ax, bx is the equivalent of bx-ax
+    jns xabs_pos_ax
+    movw    $-1,    %dx
+    imul    %dx                 # negate %ax (mul's do ax * target, store in ax)
+    ret
+    xabs_pos_ax:
+    ret
 
 switch_to_vga:
-    movb $0, %ah
-    movb $0x13, %al
-    int $0x10
+    movb    $0,     %ah
+    movb    $0x13,  %al
+    int     $0x10
     ret
 
 
@@ -132,21 +141,11 @@ cons_drawline:
     movw    (x1),   %bx
     movw    (x0),   %ax
     sub     %ax,    %bx         # ax := (x1 - x0)   SUB ax, bx is the equivalent of bx = bx-ax
-    movw    %bx,    %ax     # move answer to ax for multiplication.
-    # below is a better equivalent of calling absfunction # absolute and store ax to dx, which is in ax right now
-    cmp     $0,     %ax         # cmp ax, bx is the equivalent of bx-ax
-    jns xabs_pos_ax
-    movw    $-1,    %dx
-    imul    %dx                 # negate %ax (mul's do ax * target, store in ax)
-    xabs_pos_ax:
+    movw    %bx,    %ax     # move answer to ax for absoluting.
+    call abs_function
     movw    %ax,    (delta_x)   # store and save it in ax
     
-    # DEBUG OUTPUT START
-#    pushw  (delta_x)
-#    push   $10
-#    call    cons_write_number
-#    call cons_write_crlf
-    # DEBUG OUTPUT END
+    # clean registers used.
     xorw    %ax,    %ax
     xorw    %bx,    %bx
     xorw    %dx,    %dx
@@ -155,13 +154,8 @@ cons_drawline:
     movw    (y1),   %bx
     movw    (y0),   %ax
     sub     %ax,    %bx     # dy := abs(y1 - y0) SUB ax, bx is the equivalent of bx = bx-ax
-    movw    %bx,    %ax     # move answer to ax for multiplication.
-    # below is a better equivalent of calling absfunction # absolute and store dy to cx, which is in ax right now
-    cmp     $0,     %ax
-    jns yabs_pos_ax
-    movw    $-1,    %dx
-    imul    %dx             # negate %ax (mul's do ax * target, store in ax)
-    yabs_pos_ax:
+    movw    %bx,    %ax     # move answer to ax for absoluting.
+    call abs_function
     movw    %ax,    (delta_y) # store and save it to %delta y
     
 
@@ -184,29 +178,6 @@ cons_drawline:
     movw    $-1,    (sy)    # . else sy := -1 
     y0_lessthan:            # then sy := 1 as it's unchanged
 
-    # DEBUG OUTPUT START
-    # movw $555, (delta_x)
-#    pushw  (delta_x)
-#    push   $10
-#    call    cons_write_number
-#    movw    $blankmessage1, %si 
-#    call    cons_write
-#    pushw  (delta_y)
-#    push   $10
-#    call cons_write_number
-#    movw    $blankmessage1, %si 
-#    call    cons_write
-#    pushw  (sx)
-#    push   $10
-#    call    cons_write_number
-#    movw    $blankmessage1, %si 
-#    call    cons_write
-#    pushw  (sy)
-#    push   $10
-#    call cons_write_number
-#    call cons_write_crlf
-        # DEBUG OUTPUT END
-
     # err = dx - dy
     movw    (delta_x),  %ax
     movw    (delta_y),  %bx
@@ -216,8 +187,16 @@ cons_drawline:
 
     draw:
 
-    call setPixel # setPixel(0x,0y,colour)
-   
+    # Error handling to prevent out of range pixels being displayed
+    movw    (x0),   %ax
+    cmp     $320,   %ax 
+    jg  pixel_out_of_range
+    movw    (y0),   %ax
+    cmp     $200,   %ax 
+    jg  pixel_out_of_range
+    call setPixel   # setPixel(0x,0y,colour). Draws the pixel.
+    pixel_out_of_range:
+
     # . if x0 = x1 and y0 = y1 exit loop
     # is x equal
     movw    (x1),   %ax     # move x1 to register so it can actualy be compared to x0
@@ -370,6 +349,14 @@ real_start:
     movw    $100,  %bx     # x1
     movw    $50,   %cx     # y1
     movb    $11,   %dl     # line_colour
+    call cons_drawline
+
+    # diagonal Light red line that goes OFF THE PAGE
+    movw    $50,  %si     # x0
+    movw    $100,   %ax     # y0
+    movw    $80,  %bx     # x1
+    movw    $500,   %cx     # y1
+    movb    $12,   %dl     # line_colour
     call cons_drawline
     
     # Horisontal yellow line
