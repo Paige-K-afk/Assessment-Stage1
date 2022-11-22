@@ -188,12 +188,16 @@ cons_drawline:
     draw:
 
     # Error handling to prevent out of range pixels being displayed
-    movw    (x0),   %ax
-    cmp     $320,   %ax 
-    jg  pixel_out_of_range
-    movw    (y0),   %ax
-    cmp     $200,   %ax 
-    jg  pixel_out_of_range
+    movw    (x0),     %ax
+    cmp     $320,        %ax 
+    jg      pixel_out_of_range
+    cmp     $0,        %ax 
+    jl      pixel_out_of_range
+    movw    (y0),     %ax
+    cmp     $200,        %ax 
+    jg      pixel_out_of_range
+    cmp     $0,        %ax 
+    jl      pixel_out_of_range
     call setPixel   # setPixel(0x,0y,colour). Draws the pixel.
     pixel_out_of_range:
 
@@ -267,7 +271,7 @@ real_start:
     movw    $50,   %ax     # y0
     movw    $120,  %bx     # x1
     movw    $180,  %cx     # y1
-    movb    $9 ,  %dl     # line_colour
+    movb    $9 ,   %dl     # line_colour
     call cons_drawline
 
     # The dot
@@ -320,10 +324,10 @@ real_start:
 
     # diagonal Light blue line 2
     movw    $100,  %si     # x0
-    movw    $180,   %ax     # y0
+    movw    $180,  %ax     # y0
     movw    $120,  %bx     # x1
-    movw    $50,  %cx     # y1
-    movb    $9 ,  %dl     # line_colour
+    movw    $50,   %cx     # y1
+    movb    $9 ,   %dl     # line_colour
     call cons_drawline
     
 
@@ -352,11 +356,11 @@ real_start:
     call cons_drawline
 
     # diagonal Light red line that goes OFF THE PAGE
-    movw    $50,  %si     # x0
+    movw    $50,    %si     # x0
     movw    $100,   %ax     # y0
-    movw    $80,  %bx     # x1
+    movw    $80,    %bx     # x1
     movw    $500,   %cx     # y1
-    movb    $12,   %dl     # line_colour
+    movb    $12,    %dl     # line_colour
     call cons_drawline
     
     # Horisontal yellow line
@@ -376,45 +380,52 @@ real_start:
     call cons_drawline
 
     # diagonal magenta line 2
-    movw    $200,  %si     # x0
-    movw    $8,  %ax     # y0
-    movw    $220,  %bx     # x1
-    movw    $15,  %cx     # y1
-    movb    $5,    %dl     # line_colour
+    movw    $200,   %si     # x0
+    movw    $8,     %ax     # y0
+    movw    $220,   %bx     # x1
+    movw    $15,    %cx     # y1
+    movb    $5,     %dl     # line_colour
     call cons_drawline
 
     # Vertical red line
-    movw    $250,  %si     # x0
-    movw    $5,  %ax     # y0
-    movw    $250,  %bx     # x1
-    movw    $50,  %cx     # y1
-    movb    $4,    %dl     # line_colour
+    movw    $250,   %si     # x0
+    movw    $5,     %ax     # y0
+    movw    $250,   %bx     # x1
+    movw    $50,    %cx     # y1
+    movb    $4,     %dl     # line_colour
     call cons_drawline
 
     # Vertical pink line
-    movw    $255,  %si     # x0
-    movw    $50,  %ax     # y0
-    movw    $255,  %bx     # x1
-    movw    $5,  %cx     # y1
+    movw    $255,   %si     # x0
+    movw    $50,    %ax     # y0
+    movw    $255,   %bx     # x1
+    movw    $5,     %cx     # y1
     movb    $13,    %dl     # line_colour
     call cons_drawline
 
     # diagonal Light red line 
-    movw    $250,  %si     # x0
+    movw    $250,   %si     # x0
     movw    $150,   %ax     # y0
-    movw    $280,  %bx     # x1
-    movw    $80,   %cx     # y1
-    movb    $12,   %dl     # line_colour
+    movw    $280,   %bx     # x1
+    movw    $80,    %cx     # y1
+    movb    $12,    %dl     # line_colour
     call cons_drawline
 
     # diagonal green line 
-    movw    $280,  %si     # x0
+    movw    $280,   %si     # x0
     movw    $160,   %ax     # y0
-    movw    $250,  %bx     # x1
-    movw    $80,   %cx     # y1
-    movb    $10,   %dl     # line_colour
+    movw    $250,   %bx     # x1
+    movw    $80,    %cx     # y1
+    movb    $10,    %dl     # line_colour
     call cons_drawline
 
+    # diagonal green line 
+    movw    $20,    %si       # x0
+    movw    $150,   %ax       # y0
+    movw    $-10,   %bx       # x1
+    movw    $160,   %cx       # y1
+    movb    $10,    %dl       # line_colour
+    call cons_drawline
 
 endless_loop:                   # Loop forever more
     jmp     endless_loop    
